@@ -1,4 +1,5 @@
 import random, copy
+from math import sqrt
 
 class Matrix:
     def __init__(self, width=0, height=0, homogeneous=False, value=7, ls=[]):
@@ -71,6 +72,22 @@ class Matrix:
             for i in range(len(self.body)):
                 for j in range(len(self.body[i])):
                     self.body[i][j] = value
+
+    def rectangle(self, x, y, w, h, value=1):
+        for i in range(0,h):
+            for j in range(0,w):
+                if (0 <= i+y < len(self.body) and 
+                    0 <= j+x < len(self.body[0])):
+                    self.body[y+i][x+j] = value
+
+    def circle(self, x, y, r, value, k=1):
+        print(type(r), type(k))
+        for i in range(int(-r/k-2), int(r/k+3)):
+            for j in range(-r-2, r+3):
+                if (sqrt(i*i*k + j*j) < r and
+                    0 <= i+y < len(self.body) and 
+                    0 <= j+x < len(self.body[0])):
+                        self.body[i+y][j+x] = value
 
     def flatten(self):
         ls = []
@@ -172,11 +189,8 @@ def concantenate(t, axis=0):
     return Matrix(ls=ls)
 
 a = Matrix(5,6)
-print(a)
-type(len(a))
 b = Matrix(ls=a.copy())
 b.reshape(6,5)
-print(b)
 
 def Summatorz(la, lb, a=1):
     t = Matrix(ls=lb.copy())
@@ -244,5 +258,22 @@ def Exponentiatorz(la, lb, a=1):
                 tmat[i][k-i] *= t
     return tmat
 
-c = Subtractorz(a, b, a=2)
-print(c)
+def turner(matrix, a=1):
+    if a == 1:
+        tm = Matrix(len(matrix), len(matrix[0]))
+        for y in range(len(matrix)):
+            for x in range(len(matrix[0])):
+                tm[x][-y-1] = matrix[y][x]
+    elif a == -1:
+        tm = Matrix(len(matrix), len(matrix[0]))
+        for y in range(len(matrix)):
+            for x in range(len(matrix[0])):
+                tm[-x-1][y] = matrix[y][x]
+    elif a in (2, -2):
+        tm = copy.deepcopy(matrix)
+        for y in range(len(matrix)):
+            for x in range(len(matrix[0])):
+                tm[len(matrix)-y-1][len(matrix[0])-x-1] = matrix[y][x]
+    elif a == 0:
+        tm = copy.deepcopy(matrix)
+    return tm
