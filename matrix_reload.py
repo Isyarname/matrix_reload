@@ -2,9 +2,12 @@ import random, copy
 from math import sqrt
 
 class Matrix:
-    def __init__(self, width=0, height=0, homogeneous=False, value=7, ls=[]):
+    def __init__(self, width=0, height=0, homogeneous=False, value=7, ls=[], coordinates=[0,0]):
         self.body = []
         self.maxValLen = len(str(value))
+        self.width = width
+        self.height = height
+        self.coordinates = coordinates
         if len(ls) == 0:
             if homogeneous == True:
                 for i in range(height):
@@ -130,6 +133,22 @@ class Matrix:
                         break
             self.body = ls
         
+    def glue(self, m):
+        y, x = m.coordinates
+        h, w = m.height, m.width
+        for i, o in enumerate(m):
+            for j, oo in enumerate(o):
+                self.body[i+y][j+x] = oo
+
+    def bordürtschiki(self, value=0):
+        w = self.width
+        h = self.height
+        self.rectangle(0, 0, w, 1, value)
+        self.rectangle(0, h-1, w, 1, value)
+        self.rectangle(0, 1, 1, h, value)
+        self.rectangle(w-1, 1, 1, h, value)
+
+
     def copy(self):
         return copy.deepcopy(self.body)
 
