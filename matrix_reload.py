@@ -135,6 +135,7 @@ class Matrix:
         
     def glue(self, m):
         y, x = m.coordinates
+        #print(y, x)
         h, w = m.height, m.width
         for i, o in enumerate(m):
             for j, oo in enumerate(o):
@@ -147,6 +148,13 @@ class Matrix:
         self.rectangle(0, h-1, w, 1, value)
         self.rectangle(0, 1, 1, h, value)
         self.rectangle(w-1, 1, 1, h, value)
+
+    def matrixJoiner(self, ml):
+        symbols = "./^<—+|\\>L?-*:JZxbM"
+        for i, o in enumerate(ml):
+            o.fill(symbols[i:i+1])
+            o.bordürtschiki(value="#")
+            self.glue(o)
 
 
     def copy(self):

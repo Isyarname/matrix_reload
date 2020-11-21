@@ -68,13 +68,13 @@ def matrixJoiner(matrix, ml):
 		o.bordürtschiki(value="#")
 		matrix.glue(o)
 
-def bordürtschiki(m, value=0):
+'''def bordürtschiki(m, value=0):
 	w = m.width
 	h = m.height
 	m.rectangle(0, 0, w, 1, value)
 	m.rectangle(0, h-1, w, 1, value)
 	m.rectangle(0, 1, 1, h, value)
-	m.rectangle(w-1, 1, 1, h, value)
+	m.rectangle(w-1, 1, 1, h, value)'''
 
 
 m = Matrix(Width, Height, homogeneous=True, value=0)
