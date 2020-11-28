@@ -141,14 +141,6 @@ class Matrix:
             for j, oo in enumerate(o):
                 self.body[i+y][j+x] = oo
 
-    def bordürtschiki(self, value=0):
-        w = self.width
-        h = self.height
-        self.rectangle(0, 0, w, 1, value)
-        self.rectangle(0, h-1, w, 1, value)
-        self.rectangle(0, 1, 1, h, value)
-        self.rectangle(w-1, 1, 1, h, value)
-
     def matrixJoiner(self, ml, symbols="./^<—+|\\>L?-*:JZxbM"):
         #symbols = "./^<—+|\\>L?-*:JZxbM"
         for i, o in enumerate(ml):

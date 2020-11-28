@@ -1,5 +1,5 @@
 from matrix_reload import *
-from random import randint, choice
+from random import randint, choice, shuffle
 import copy
 import time
 
@@ -11,21 +11,33 @@ class Room(Matrix):
 		self.canExpand = True
 		self.colDir = []
 		self.numberOfOutputs = 0
+		self.directions = ["left", "right", "up", "down"]
 
-	def neighbourCount():
-		countMatrix.fill(0)
-		for y in range(Height):
-			for x in range(Width):
-				if matrix[y][x] == 1:
-					countMatrix[y-1][x-1] +=1
-					countMatrix[y-1][x] +=1
-					countMatrix[y-1][x+1- Width] +=1
-					countMatrix[y][x-1] +=1
-					countMatrix[y][x+1- Width] +=1
-					countMatrix[y+1- Height][x-1] +=1
-					countMatrix[y+1- Height][x] +=1
-					countMatrix[y+1- Height][x+1- Width] +=1
+	def glue(self, m, allowList=["#", 0]):
+		y, x = m.coordinates
+		h, w = m.height, m.width
+		for i, o in enumerate(m):
+			for j, oo in enumerate(o):
+				if self.body[i+y][j+x] in allowList:
+					self.body[i+y][j+x] = oo
 
+	def walls(self, axis, value="#"):
+		w = self.width
+		h = self.height
+		if axis == "x":
+			self.rectangle(0, 0, w, 1, value)
+			self.rectangle(0, h-1, w, 1, value)
+		elif axis == "y":
+			self.rectangle(0, 0, 1, h, value)
+			self.rectangle(w-1, 0, 1, h, value)
+
+	def bordürtschiki(self, value=0):
+		w = self.width
+		h = self.height
+		self.rectangle(0, 0, w, 1, value)
+		self.rectangle(0, h-1, w, 1, value)
+		self.rectangle(0, 1, 1, h, value)
+		self.rectangle(w-1, 1, 1, h, value)
 
 	def expand(self):
 		"""
@@ -62,10 +74,10 @@ class Room(Matrix):
 def main():
 	width = 30
 	height = 30
-	matrix = Matrix(width, height, homogeneous=True, value=0)
-	testMatrix = Matrix(width, height, homogeneous=True, value=0)
+	matrix = Room(width, height, homogeneous=True, value=0)
+	#testMatrix = Matrix(width, height, homogeneous=True, value=0)
 	rooms = []
-	depth = 3
+	depth = 5
 	quantity = 4
 	for i in range(quantity):
 		r = Room(depth, depth, coordinates=[randint(depth,height-1-depth), randint(depth,width-1-depth)])
@@ -88,62 +100,85 @@ def main():
 		print(matrix)
 		time.sleep(0.1)
 	corridors = corridorsCreator(rooms, matrix)
-	matrix.matrixJoiner(corridors, symbols="ccccccccccccccccccc")
+	#matrix.matrixJoiner(corridors, symbols="ccccccccccccccccccc")
+	for i, o in enumerate(corridors):
+		matrix.glue(o)
 	print(matrix)
 	print(corridors)
 
 def corridorsCreator(rooms, matrix):		
 	corridors = []
+	symbols = "./^<—+|\\>L?-*:JZxbMc"
+	allowList = ["#", 0]
 	for i, r in enumerate(rooms):
-		dir = choice(["left", "right", "up", "down"])
+		directions = ["left", "right", "up", "down"]
+		shuffle(directions)
 		y0, x0 = r.coordinates
 		h, w = r.height, r.width
-		if dir == "left":
-			r1 = range(y0+1, y0+h-1)
-			r2 = range(x0-1, -1, -1)
-			coordinate0 = x0
-			a = "y"
-		elif dir == "right":
-			r1 = range(y0+1, y0+h-1)
-			r2 = range(x0+w, matrix.width)
-			coordinate0 = x0+w-1
-			a = "y"
-		elif dir == "up":
-			r1 = range(x0+1, x0+w-1)
-			r2 = range(y0-1, -1, -1)
-			coordinate0 = y0
-			a = "x"
-		elif dir == "down":
-			r1 = range(x0+1, x0+w-1)
-			r2 = range(y0+h, matrix.height)
-			coordinate0 = y0+h-1
-			a = "x"
-		else:
-			print("почему")
-		mda = raycasting(a, coordinate0, r1, r2, matrix, corridors)
-		print("mda", mda)
-		corridors=mda
-	return corridors
+		for dir in directions:
+			if dir == "left":
+				exitFlag = False
+				for y in range(y0+1, y0+h-1):
+					for j, x in enumerate(range(x0-1, -1, -1)):
+						if str(matrix[y][x]) in symbols:
+							corridor = Room(j+1, 3, homogeneous=True, value="c", coordinates=[y-1, x+1])
+							corridor.walls(axis="x")
+							print(corridor.coordinates)
+							print(corridor.height, corridor.width)
+							matrix.glue(corridor, allowList)
+							exitFlag = True
+							break
+						elif str(matrix[y][x]) == "c":
+							exitFlag = True
+							break
+					if exitFlag:
+						break
 
+			elif dir == "right":
+				exitFlag = False
+				for y in range(y0+1, y0+h-1):
+					for j, x in enumerate(range(x0+w, matrix.height)):
+						if str(matrix[y][x]) in symbols:
+							corridor = Room(j+1, 3, homogeneous=True, value="c", coordinates=[y-1, x0+w-1])
+							corridor.walls(axis="x")
+							print(corridor.coordinates)
+							print(corridor.height, corridor.width)
+							matrix.glue(corridor, allowList)
+							exitFlag = True
+							break
+					if exitFlag:
+						break
 
-def raycasting(a, coordinate0, r1, r2, matrix, corridors):
-	print(corridors)
-	if a == "y":
-		for y in r1:
-			for i, x in enumerate(r2):
-				if str(matrix[y][x]) in "./^<—+|\\>L?-*:JZxbM":
-					corridor = Room(i+2, 3, homogeneous=True, value="c", coordinates=[y-1, coordinate0])
-					corridors.append(corridor)
-					print("sdfghjk",corridors)
-					return corridors
-	elif a == "x":
-		for x in r1:
-			for i, y in enumerate(r2):
-				if str(matrix[y][x]) in "./^<—+|\\>L?-*:JZxbM":
-					corridor = Room(3, i+2, homogeneous=True, value="c", coordinates=[coordinate0, x-1])
-					corridors.append(corridor)
-					print("sdfghjk2",corridors)
-					return corridors
+			elif dir == "up":
+				exitFlag = False
+				for x in range(x0+1, x0+w-1):
+					for j, y in enumerate(range(y0-1, -1, -1)):
+						if str(matrix[y][x]) in symbols:
+							corridor = Room(3, j+1, homogeneous=True, value="c", coordinates=[y+1, x-1])
+							corridor.walls(axis="y")
+							matrix.glue(corridor, allowList)
+							print(corridor.coordinates)
+							print(corridor.height, corridor.width)
+							exitFlag = True
+							break
+					if exitFlag:
+						break
+
+			elif dir == "down":
+				exitFlag = False
+				for x in range(x0+1, x0+w-1):
+					for j, y in enumerate(range(y0+h, matrix.height)):
+						if str(matrix[y][x]) in symbols:
+							corridor = Room(3, j+1, homogeneous=True, value="c", coordinates=[y0+h-1, x-1])
+							corridor.walls(axis="y")
+							matrix.glue(corridor, allowList)
+							print(corridor.coordinates)
+							print(corridor.height, corridor.width)
+							exitFlag = True
+							break
+					if exitFlag:
+						break
+			
 	return corridors
 
 def impositionChecker(i, rooms):
