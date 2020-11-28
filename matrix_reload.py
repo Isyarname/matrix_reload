@@ -149,8 +149,8 @@ class Matrix:
         self.rectangle(0, 1, 1, h, value)
         self.rectangle(w-1, 1, 1, h, value)
 
-    def matrixJoiner(self, ml):
-        symbols = "./^<—+|\\>L?-*:JZxbM"
+    def matrixJoiner(self, ml, symbols="./^<—+|\\>L?-*:JZxbM"):
+        #symbols = "./^<—+|\\>L?-*:JZxbM"
         for i, o in enumerate(ml):
             o.fill(symbols[i:i+1])
             o.bordürtschiki(value="#")

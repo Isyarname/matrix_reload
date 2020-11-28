@@ -1,5 +1,5 @@
 from matrix_reload import *
-from random import randint
+from random import randint, choice
 import copy
 import time
 
@@ -9,6 +9,8 @@ class Room(Matrix):
 		Matrix.__init__(self, width, height, homogeneous, value, ls, coordinates)
 		self.value = value
 		self.canExpand = True
+		self.colDir = []
+		self.numberOfOutputs = 0
 
 	def neighbourCount():
 		countMatrix.fill(0)
@@ -84,8 +86,65 @@ def main():
 				canExpand = True
 		matrix.matrixJoiner(rooms)
 		print(matrix)
-		time.sleep(0.01)
+		time.sleep(0.1)
+	corridors = corridorsCreator(rooms, matrix)
+	matrix.matrixJoiner(corridors, symbols="ccccccccccccccccccc")
+	print(matrix)
+	print(corridors)
 
+def corridorsCreator(rooms, matrix):		
+	corridors = []
+	for i, r in enumerate(rooms):
+		dir = choice(["left", "right", "up", "down"])
+		y0, x0 = r.coordinates
+		h, w = r.height, r.width
+		if dir == "left":
+			r1 = range(y0+1, y0+h-1)
+			r2 = range(x0-1, -1, -1)
+			coordinate0 = x0
+			a = "y"
+		elif dir == "right":
+			r1 = range(y0+1, y0+h-1)
+			r2 = range(x0+w, matrix.width)
+			coordinate0 = x0+w-1
+			a = "y"
+		elif dir == "up":
+			r1 = range(x0+1, x0+w-1)
+			r2 = range(y0-1, -1, -1)
+			coordinate0 = y0
+			a = "x"
+		elif dir == "down":
+			r1 = range(x0+1, x0+w-1)
+			r2 = range(y0+h, matrix.height)
+			coordinate0 = y0+h-1
+			a = "x"
+		else:
+			print("почему")
+		mda = raycasting(a, coordinate0, r1, r2, matrix, corridors)
+		print("mda", mda)
+		corridors=mda
+	return corridors
+
+
+def raycasting(a, coordinate0, r1, r2, matrix, corridors):
+	print(corridors)
+	if a == "y":
+		for y in r1:
+			for i, x in enumerate(r2):
+				if str(matrix[y][x]) in "./^<—+|\\>L?-*:JZxbM":
+					corridor = Room(i+2, 3, homogeneous=True, value="c", coordinates=[y-1, coordinate0])
+					corridors.append(corridor)
+					print("sdfghjk",corridors)
+					return corridors
+	elif a == "x":
+		for x in r1:
+			for i, y in enumerate(r2):
+				if str(matrix[y][x]) in "./^<—+|\\>L?-*:JZxbM":
+					corridor = Room(3, i+2, homogeneous=True, value="c", coordinates=[coordinate0, x-1])
+					corridors.append(corridor)
+					print("sdfghjk2",corridors)
+					return corridors
+	return corridors
 
 def impositionChecker(i, rooms):
 	y1, x1 = rooms[i].coordinates
@@ -112,6 +171,18 @@ def roomChecker(rm, i, rooms, matrix):
 		rm.canExpand = False
 		print("#1")
 		return True
+	'''if x1 + w1 == matrix.width:
+		rm.colDir.append("right")
+		return True
+	elif x1 == 0:
+		rm.colDir.append("left")
+		return True
+	elif y1 == 0:
+		rm.colDir.append("up")
+		return True
+	elif y1 + h1 == matrix.height:
+		rm.colDir.append("down")
+		return True'''
 
 	for rid, room in enumerate(rooms):
 		y2, x2 = room.coordinates
@@ -127,6 +198,12 @@ def roomChecker(rm, i, rooms, matrix):
 					#print(rm)
 					#print(room)
 					return True
+				'''if x1 + w1 == x2:
+					rm.colDir.append("right")
+					return True
+				elif x1 == x2 + w2:
+					rm.colDir.append("left")
+					return True'''
 
 			if (x1 <= x2 + w2 - 1 and
 				x1 + w1 - 1 >= x2):
@@ -138,6 +215,12 @@ def roomChecker(rm, i, rooms, matrix):
 					#print(rm)
 					#print(room)
 					return True
+				'''if y1 == y2 + h2:
+					rm.colDir.append("up")
+					return True
+				elif y1 + h1 == y2:
+					rm.colDir.append("down")
+					return True'''
 
 
 
