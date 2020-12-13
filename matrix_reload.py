@@ -9,7 +9,7 @@ class Matrix:
         self.height = height
         self.coordinates = coordinates
         if len(ls) == 0:
-            if homogeneous == True:
+            if homogeneous:
                 for i in range(height):
                     temp = []
                     for j in range(width):
@@ -27,34 +27,61 @@ class Matrix:
             self.body.extend(ls)
             
 
-    def matrixToString(self):
-        if type(self.body[0]) == int:
-                for i in self.body:
+    def matrixToString(self, caption=True, gaps=True):
+        #создание временной матрицы
+        if caption:
+            tempMatrix = []
+            if type(self.body[0]) != int:
+                tempMatrix.append([" "])
+                for i in range(len(self.body[0])):
+                    tempMatrix[0].append(i)
+
+                for i, o in enumerate(self.body):
+                    tempMatrix.append([i])
+                    for j, oo in enumerate(self.body[i]):
+                        tempMatrix[i+1].append(oo)
+        else:
+            tempMatrix = self.body
+
+        #нахождение максимальноё длины значения в ячейке
+        if type(tempMatrix[0]) == int:
+                for i in tempMatrix:
                     lenght = len(str(i))
                     if lenght > self.maxValLen:
                         self.maxValLen = lenght
         else:    
-            for i in self.body:
+            for i in tempMatrix:
                 for j in i:
                     lenght = len(str(j))
                     if lenght > self.maxValLen:
                         self.maxValLen = lenght
+
+        #создание строки
         s = ""
-        if type(self.body[0]) != int:
-            for i, o in enumerate(self.body):
+        if type(tempMatrix[0]) != int:
+            for i, o in enumerate(tempMatrix):
                 for j, oo in enumerate(o):
                     val = str(oo)
-                    s += val + " "
+                    s += val
+                    if gaps:
+                        s += " "
                     if len(val) < self.maxValLen:
                         for i in range(self.maxValLen - len(val)):
                             s += " "
                 s += "\n"
         else:
-            for i in self.body:
-                s += str(i) + " "
+            if gaps:
+                for i in tempMatrix:
+                    s += str(i) + " "
+            else:
+                for i in tempMatrix:
+                    s += str(i)
         return s
 
     def transpose(self):
+        '''
+        поворачивает матрицуц по диагонали
+        '''
         ls = []
         if type(self.body[0]) != int:
             for i in range(len(self.body[0])):
@@ -148,12 +175,20 @@ class Matrix:
             o.bordürtschiki(value="#")
             self.glue(o)
 
+    def bordürtschiki(self, value=0):
+        w = self.width
+        h = self.height
+        self.rectangle(0, 0, w, 1, value)
+        self.rectangle(0, h-1, w, 1, value)
+        self.rectangle(0, 1, 1, h, value)
+        self.rectangle(w-1, 1, 1, h, value)
+
 
     def copy(self):
         return copy.deepcopy(self.body)
 
     def __str__(self):
-        return self.matrixToString()
+        return self.matrixToString(caption=True, gaps=False)
 
     def __add__(self, other):
         for i,o in enumerate(self.body):
@@ -192,26 +227,29 @@ class Matrix:
         #return iter(self.body)
 
 
-def concantenate(t, axis=0):
-    ls = []
+def concantenator(matrixList, axis=0):
+    """
+    эта штука соединяет матрицы
+    """
+    tempList = []
     if axis == 0:
-        for i in t:
-            ls.extend(i.body)
+        for i in matrixList:
+            tempList.extend(i.body)
 
     elif axis == 1:
-        for i in range(len(t[0].body)):
-            ls.append([])
+        for i in range(len(matrixList[0].body)):
+            tempList.append([])
 
-        for i in range(len(t[0].body)):
-            for j in t:
-                ls[i].extend(j.body[i])
-    return Matrix(ls=ls)
+        for i in range(len(matrixList[0].body)):
+            for j in matrixList:
+                tempList[i].extend(j.body[i])
+    return Matrix(ls=tempList)
 
-a = Matrix(5,6)
-b = Matrix(ls=a.copy())
-b.reshape(6,5)
 
-def Summatorz(la, lb, a=1):
+def summatorz(la, lb, a=1):
+    '''
+    сложение матриц
+    '''
     t = Matrix(ls=lb.copy())
     l = min(len(la), len(la[0]), len(lb), len(lb[0]))
     if a == 1:
@@ -223,7 +261,10 @@ def Summatorz(la, lb, a=1):
             t[i][k-i] += la[i][l-1-i]
     return t
 
-def Subtractorz(la, lb, a=1):
+def subtractorz(la, lb, a=1):
+    '''
+    вычитает из первой матрицы вторую
+    '''
     t = Matrix(ls=lb.copy())
     l = min(len(la), len(la[0]), len(lb), len(lb[0]))
     if a == 1:
@@ -235,7 +276,10 @@ def Subtractorz(la, lb, a=1):
             t[i][k-i] -= la[i][l-1-i]
     return t
 
-def Multiplierz(la, lb, a=1):
+def multiplierz(la, lb, a=1):
+    '''
+    умножает матрицы
+    '''
     t = Matrix(ls=lb.copy())
     l = min(len(la), len(la[0]), len(lb), len(lb[0]))
     if a == 1:
@@ -249,7 +293,10 @@ def Multiplierz(la, lb, a=1):
             t[i][k-i] *= la[i][l-1-i]
     return t
 
-def Dividerz(la, lb, a=1):
+def dividerz(la, lb, a=1):
+    '''
+    делит матрицы
+    '''
     t = Matrix(ls=lb.copy())
     l = min(len(la), len(la[0]), len(lb), len(lb[0]))
     if a == 1:
@@ -261,7 +308,10 @@ def Dividerz(la, lb, a=1):
             t[i][k-i] //= la[i][l-1-i]
     return t
 
-def Exponentiatorz(la, lb, a=1):
+def exponentiatorz(la, lb, a=1):
+    '''
+    водит числаиз первой матрицы в степени из второй матрицы
+    '''
     tmat = Matrix(ls=lb.copy())
     l = min(len(la), len(la[0]), len(lb), len(lb[0]))     
     if a == 1:
@@ -278,6 +328,9 @@ def Exponentiatorz(la, lb, a=1):
     return tmat
 
 def turner(matrix, a=1):
+    '''
+    поворачивает матрицу на a*90 градусов
+    '''
     if a == 1:
         tm = Matrix(len(matrix), len(matrix[0]))
         for y in range(len(matrix)):
